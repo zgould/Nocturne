@@ -1,0 +1,29 @@
+- name: Install JunOS
+  hosts: junos-sales-switch
+  serial: 1
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  vars:
+   wait_time: 3600
+   pkg_dir: /tftpboot/juniper/
+   OS_version: 14.1X53-D45.3
+   OS_package: jinstall-ex-4300-14.1X53-D45.3-domestic-signed.tgz
+   log_dir: /var/log/ansible
+   netconf:
+    host: "{{ inventory_hostname }}"
+    username: admin
+
+  tasks:
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Deactivate BGP Peering
+    junos_config:
+     lines:
+     - "deactivate protocols bgp group {{ BGP_GROUP }} local-address"
+     provider: "{{ netconf }}"
+

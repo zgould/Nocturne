@@ -1,0 +1,50 @@
+- name: Install JunOS
+  hosts: msp1-dc1-sw-01
+  serial: 1
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  vars:
+   wait_time: 3600
+   pkg_dir: /tftpboot/juniper/
+   OS_version: 15.1R3.6
+   OS_package: jinstall-ex-4300-15.1R3.6-domestic-signed.tgz
+   log_dir: /var/log/ansible
+   netconf:
+    host: "{{ inventory_hostname }}"
+    username: databank
+
+  tasks:
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Install JunOS Software
+    junos_install_os:
+     user=databank
+     host={{ inventory_hostname }}
+     nssu=yes
+     version={{ OS_version }}
+     reboot=yes
+     package={{ pkg_dir }}/{{ OS_package }}
+     logfile={{ log_dir }}/software.log
+    register: sw
+    notify:
+    - wait_reboot
+    - send mail
+
+  handlers:
+
+  - name: wait_reboot
+    wait_for: host={{ inventory_hostname }} port=830 timeout={{ wait_time }}
+    when: not sw.check_mode
+
+  - name: send mail
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version }}'
+     to: zgould@databank.com
+

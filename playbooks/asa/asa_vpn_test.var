@@ -1,0 +1,5 @@
+vpn_local: test-vpn-local
+objects:
+  local:
+    - 192.168.252.0 255.255.255.0
+    - 8.8.8.8 255.255.255.252

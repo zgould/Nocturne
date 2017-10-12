@@ -1,0 +1,25 @@
+- name: Run Commands
+  connection: local
+  hosts: "{{ host }}"
+  gather_facts: false
+  vars:
+   creds:
+    username: databank
+    password: Ste@ks2
+    host: "{{ inventory_hostname }}"
+    authorize: yes
+    auth_pass: ch!cK3n
+   command: show version | grep Seri
+  tasks:
+
+  - name: Register Original Boot Variable
+    asa_command:
+     commands:
+      - "{{ command }}"
+     provider: "{{ creds }}"
+    register: result
+
+  - name:
+    debug:
+      var: result.stdout_lines
+

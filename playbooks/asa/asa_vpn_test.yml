@@ -1,0 +1,12 @@
+- name: Testing Templating
+  hosts: localhost
+  gather_facts: false
+
+  vars_files: 
+    - /home/zgould/playbooks/asa/asa_vpn_vars.yml
+
+  tasks:
+    - name: make template
+      template: src=/home/zgould/playbooks/asa/asa_vpn_test.j2 dest=/home/zgould/playbooks/asa/asa_vpn_results.yml
+
+    - include_tasks: /home/zgould/playbooks/asa/asa_vpn_results.yml

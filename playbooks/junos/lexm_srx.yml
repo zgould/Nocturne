@@ -1,0 +1,38 @@
+- name: Run Commands On LEXM SRX Devices
+  hosts: lexm-srx
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  vars:
+   wait_time: 3600
+   log_dir: /var/log/ansible
+   netconf:
+    host: "{{ inventory_hostname }}"
+    username: databank
+    timeout: 120
+
+  tasks:
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Run Commands
+    junos_config:
+     lines:
+     - "set routing-options static route 172.28.223.49/32 next-hop 172.21.199.13"
+     - "set routing-options static route 172.29.214.196/32 next-hop 172.21.199.13"
+     - "set routing-options static route 192.168.161.173/32 next-hop 172.21.199.13"
+     - "set routing-options static route 172.27.244.57/32 next-hop 172.21.199.13"
+     provider: "{{ netconf }}"
+    register: results
+    notify:
+    - send mail
+
+  handlers:
+  - name: send mail
+    mail:
+     subject: Changes on {{ inventory_hostname }} Complete
+     body: ' Changes have been made to {{ inventory_hostname }}'
+     to: net-services@databank.com

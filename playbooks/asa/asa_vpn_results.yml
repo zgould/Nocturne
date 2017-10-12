@@ -1,0 +1,57 @@
+- name: Run Commands
+  connection: local
+  hosts: asa-test
+  gather_facts: false
+  vars_files:
+    - /home/zgould/playbooks/asa/vars/main.yml
+  tasks:
+
+  - name: Set Firmware for Upgrade On Reboot
+    asa_config:
+     lines:
+      - network-object amci-vpn-local
+      - object-group 192.168.252.0 255.255.255.0
+      - object-group 8.8.8.8 255.255.255.252
+      - object-group 9.9.9.9 255.255.255.240
+      - object-group 10.10.11.12 255.255.242.0
+      - exit
+      - network-object amci-vpn-remote
+      - object-group 192.168.252.0 255.255.255.0
+      - object-group 8.8.8.8 255.255.255.252
+      - object-group 9.9.9.9 255.255.255.240
+      - object-group 10.10.11.12 255.255.242.0
+      - exit
+      - access-list amci-vpn extended permit ip object-group amci-vpn-local object-group amci-vpn-remote
+      - access-list acl_DMZDAL line 1 extended permit ip amci-vpn-local object-group amci-vpn-remote
+      - nat (inside,outside) source static amci-vpn-local amci-vpn-local destination static amci-vpn-remote amci-vpn-remote no-proxy-arp route-lookup
+      - crypto map outside-crypt 27 match address amci-vpn
+      - crypto map outside-crypt 27 set pfs
+      - crypto map outside-crypt 27 set peer 208.89.114.189
+      - crypto map outside-crypt 27 set ikev1 transform-set ESP-AES-256-SHA
+      - crypto map outside-crypt 27 set ikev2 ipsec-proposal ESP-AES-256
+      - crypto map outside-crypt 27 set security-association lifetime seconds 28800
+      - crypto map outside-crypt 27 set security-association lifetime kilobytes 3200000
+      - tunnel-group 208.89.114.189 type ipsec-l2l
+      - tunnel-group 208.89.114.189 ipsec-attributes
+      - pre-shared-key l0l3rk0pt#r
+      - exit
+      - wr me
+
+     provider: "{{ creds }}"
+
+  - name: Validation
+    asa_command:
+     commands:
+      - show object-group id amci-vpn-local
+      - show object-group id amci-vpn-remote
+      - show run access-list | g amci
+      - show run | g crypt 27
+      - show ipsec sa peer 208.89.114.189
+
+     provider: "{{ creds }}"
+
+    register: output
+  - name:
+    debug:
+      var: output.stdout_lines
+

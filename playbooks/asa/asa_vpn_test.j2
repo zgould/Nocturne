@@ -1,0 +1,57 @@
+- name: Run Commands
+  connection: local
+  hosts: asa-test
+  gather_facts: false
+  vars_files:
+    - /home/zgould/playbooks/asa/vars/main.yml
+  tasks:
+
+  - name: Set Firmware for Upgrade On Reboot
+    asa_config:
+     lines:
+      - network-object {{ vpn_name }}-vpn-local
+{% for ip in local_object.objects %}
+      - object-group {{ ip }}
+{% endfor %}
+      - exit
+      - network-object {{ vpn_name }}-vpn-remote
+{% for ip in remote_object.objects %}
+      - object-group {{ ip }}
+{% endfor %}
+      - exit
+      - access-list {{ vpn_name }}-vpn extended permit ip object-group {{ vpn_name }}-vpn-local object-group {{ vpn_name }}-vpn-remote
+      - access-list {{ acl_group }} line 1 extended permit ip {{ vpn_name }}-vpn-local object-group {{ vpn_name }}-vpn-remote
+      - nat {{ nat_interface }} source static {{ vpn_name }}-vpn-local {{ vpn_name }}-vpn-local destination static {{ vpn_name }}-vpn-remote {{ vpn_name }}-vpn-remote no-proxy-arp route-lookup
+      - crypto map outside-crypt {{ crypto_number }} match address {{ vpn_name }}-vpn
+      - crypto map outside-crypt {{ crypto_number }} set pfs
+      - crypto map outside-crypt {{ crypto_number }} set peer {{ peer_ip }}
+      - crypto map outside-crypt {{ crypto_number }} set ikev1 transform-set {{ ikev1_transform_set }}
+      - crypto map outside-crypt {{ crypto_number }} set ikev2 ipsec-proposal {{ ikev2_proposal }}
+      - crypto map outside-crypt {{ crypto_number }} set security-association lifetime seconds {{ lifetime_seconds }}
+      - crypto map outside-crypt {{ crypto_number }} set security-association lifetime kilobytes {{ lifetime_kilobytes }}
+      - tunnel-group {{ peer_ip }} type ipsec-l2l
+      - tunnel-group {{ peer_ip }} ipsec-attributes
+      - pre-shared-key {{ pre_shared_key }}
+      - exit
+      - wr me
+{% raw %}
+     provider: "{{ creds }}"
+{% endraw %}
+
+  - name: Validation
+    asa_command:
+     commands:
+      - show object-group id {{ vpn_name }}-vpn-local
+      - show object-group id {{ vpn_name }}-vpn-remote
+      - show run access-list | g {{ vpn_name }}
+      - show run | g crypt {{ crypto_number }}
+      - show ipsec sa peer {{ peer_ip }}
+{% raw %}
+     provider: "{{ creds }}"
+{% endraw %}
+
+    register: output
+  - name:
+    debug:
+      var: output.stdout_lines
+

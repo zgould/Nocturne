@@ -1,0 +1,15 @@
+- hosts: cisco 
+  gather_facts: no
+  connection: local
+
+  tasks:
+
+  - name: Run Command
+    ios_command:
+      host: 192.168.246.12
+      username: admin
+      password: br@!wuRst2
+      auth_pass: H@mburg3r
+      authorize: yes
+      commands:
+        - show version

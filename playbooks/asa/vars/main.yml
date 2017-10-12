@@ -1,0 +1,8 @@
+---
+creds:
+    username: databank
+    password: Ste@ks2
+    host: "{{ inventory_hostname }}"
+    authorize: yes
+    auth_pass: ch!cK3n
+

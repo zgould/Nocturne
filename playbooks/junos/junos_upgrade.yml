@@ -1,0 +1,89 @@
+- name: Install JunOS
+  hosts: kc2-core-routers
+  serial: 1
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+  ignore_errors: yes
+
+  vars:
+   wait_time: 3600
+   pkg_dir: /tftpboot/juniper/
+   OS_version: 15.1R6.7
+   OS_package: jinstall-ex-2200-15.1R6.7-domestic-signed.tgz
+   OS_version2: 12.3R12.4
+   OS_package2: jinstall-ex-2200-12.3R12.4-domestic-signed.tgz
+   log_dir: /var/log/ansible
+   netconf:
+    host: "{{ inventory_hostname }}"
+    username: admin
+
+  tasks:
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Deactivate BGP Peering
+    junos_config:
+     lines:
+     - "deactivate protocols bgp group {{ BGP_GROUP }} local-address"
+     provider: "{{ netconf }}"
+
+  - name: Install JunOS Software
+    junos_install_os:
+     user=admin
+     host={{ inventory_hostname }}
+     version={{ OS_version }}
+     reboot=yes
+     package={{ pkg_dir }}/{{ OS_package }}
+     logfile={{ log_dir }}/software.log
+    register: sw
+    notify:
+    - wait_reboot
+    - send mail
+
+  - meta: flush_handlers
+
+  - name: Re-enable BGP Peering
+    junos_config:
+     lines:
+     - "activate protocols bgp group {{ BGP_GROUP }} local-address"
+     provider: "{{ netconf }}"
+
+  post_tasks:
+  
+  - name: send completion e-mail
+    mail:
+     subject: Everything is Done!
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version2 }}'
+     to: zgould@databank.com
+
+
+  handlers:
+  - name: wait_reboot
+    wait_for: host={{ inventory_hostname }} port=830 timeout={{ wait_time }}
+    when: not sw.check_mode
+
+  - name: send mail
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version }}'
+     to: zgould@databank.com
+
+  - name: send mail2
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version2 }}'
+     to: zgould@databank.com
+
+  - name: send mail3
+    mail:
+     subject: Everything is Done!
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version2 }}'
+     to: zgould@databank.com
+

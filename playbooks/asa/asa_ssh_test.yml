@@ -1,0 +1,10 @@
+- name: SSH Test - ASA
+  hosts: asa-all
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: Checking SSH connectivity
+    wait_for: host={{ inventory_hostname }} port=22 timeout=30
+

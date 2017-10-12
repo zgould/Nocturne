@@ -1,0 +1,63 @@
+- name: Firmware Install
+  connection: local
+  hosts: asa-test
+  gather_facts: false
+  vars:
+   creds:
+    username: databank
+    password: Ste@ks2
+    transport: cli
+    host: "{{ inventory_hostname }}"
+    authorize: yes
+    auth_pass: ch!cK3n
+   orig_boot: asa916-10-k8.bin
+   new_boot: asa917-16-k8.bin
+ 
+  tasks:
+
+  - name: SCP Firmware Onto Device
+    local_action: command scp /tftpboot/asa/asa917-16-k8.bin databank@192.168.244.254:disk0:asa917-16-k8.bin
+
+  - name: Register Original Boot Variable
+    asa_command:
+     commands:
+      - show version | g System image
+     provider: "{{ creds }}"
+    register: version_before
+
+  - name: Set Firmware for Upgrade On Reboot
+    asa_config:
+     lines:
+      - no boot system disk0:/{{ orig_boot }}
+      - boot system disk0:/{{ new_boot }}
+      - wr me
+      - reload noconfirm
+     provider: "{{ creds }}"
+
+  - name: Wait for Upgrade To Complete
+    pause:
+     minutes: 30
+
+  - name: Register New Boot Variable
+    asa_command:
+     commands:
+      - show version | g System image
+     provider: "{{ creds }}"
+    register: version_after
+
+  - name: Send Mail - Success
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Completed Successfully
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ new_boot }}'
+     to: zgould@databank.com
+    when: version_before != version_after
+
+  - name: Send Mail - Failure
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Failed
+     body: ' Automated upgade of {{ inventory_hostname }} has failed.
+     Firmware is currently {{ orig_boot }}'
+     to: zgould@databank.com
+    when: version_before == version_after
+

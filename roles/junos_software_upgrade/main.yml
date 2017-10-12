@@ -1,0 +1,8 @@
+#- name: Install JunOS
+- hosts: msp1-dc1-sw-01
+  serial: 1
+  roles:
+  - Juniper.junos
+  - role: juniper
+  connection: local
+  gather_facts: no

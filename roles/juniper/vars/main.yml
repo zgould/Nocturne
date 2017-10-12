@@ -1,0 +1,11 @@
+---
+wait_time: 3600
+pkg_dir: /tftpboot/juniper/
+OS_version: 15.1R3.6
+OS_package: jinstall-ex-4300-15.1R3.6-domestic-signed.tgz
+log_dir: /var/log/ansible
+netconf:
+ host: "{{ inventory_hostname }}"
+ username: databank
+
+

@@ -1,0 +1,16 @@
+- name: SSH Test - ASA
+  hosts: zabbix
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: Create a named maintenance window for host  for 90 minutes
+    zabbix_maintenance:
+      name: Update of slc1-int-sw-core
+      host_name: slc1-int-sw-core
+      state: present
+      minutes: 90
+      server_url: http://mci2-zabbix-master.databank.local/zabbix/
+      login_user: zgould
+      login_password: '@R3birth!!'

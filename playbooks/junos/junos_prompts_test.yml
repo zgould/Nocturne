@@ -1,0 +1,14 @@
+- hosts: "{{ host1 }}"
+  gather_facts: True
+  vars_prompt:
+    - name: "Version"
+      prompt: "Which version Do you want to install?"
+      private: no
+    - name: "host1"
+      prompt: "hostname"
+      private: no
+
+  tasks:
+    - name: Ansible prompt example.
+      debug:
+        msg: "{{ Version }}"

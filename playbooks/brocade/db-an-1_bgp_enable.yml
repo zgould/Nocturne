@@ -1,0 +1,14 @@
+- name: Enable BGP Peering - IPv6 
+  connection: local
+  hosts: 127.0.0.1
+  gather_facts: false
+
+  tasks:
+  - name: 
+    local_action: command /home/zgould/playbooks/brocade/db-an-1_enable_bgp.py
+    register: result
+
+  - name:
+    debug:
+      var: result.stdout_lines
+

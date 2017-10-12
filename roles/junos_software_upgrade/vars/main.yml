@@ -1,0 +1,16 @@
+---
+wait_time: 3600
+pkg_dir: /tftpboot/juniper/
+### Only Change Below Variables ###
+
+OS_version: 14.1X53-D45.3
+OS_package: jinstall-ex-4300-14.1X53-D45.3-domestic-signed.tgz
+nssu: no
+
+### End of Change Variables ###
+log_dir: /var/log/ansible
+netconf:
+ host: "{{ inventory_hostname }}"
+ username: databank
+
+

@@ -1,0 +1,29 @@
+vpn_name: amci
+acl_group: acl_DMZDAL
+nat_interface: "(inside,outside)"
+crypto_number: "27"
+peer_ip: "208.89.114.189"
+ikev1_transform_set: ESP-AES-256-SHA
+ikev2_proposal: ESP-AES-256
+lifetime_seconds: "28800"
+lifetime_kilobytes: "3200000"
+pre_shared_key: "l0l3rk0pt#r"
+local_object:
+    objects: 
+      - "192.168.252.0 255.255.255.0"
+      - "8.8.8.8 255.255.255.252"
+      - "9.9.9.9 255.255.255.240"
+      - "10.10.11.12 255.255.242.0"
+remote_object:
+    objects:
+      - "192.168.252.0 255.255.255.0"
+      - "8.8.8.8 255.255.255.252"
+      - "9.9.9.9 255.255.255.240"
+      - "10.10.11.12 255.255.242.0"
+#creds:
+# username: databank
+# password: Ste@ks2
+# host: "{{ inventory_hostname }}"
+# authorize: yes
+# auth_pass: ch!cK3n
+

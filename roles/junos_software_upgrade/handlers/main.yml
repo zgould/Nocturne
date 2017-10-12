@@ -1,0 +1,12 @@
+---
+  - name: wait_reboot
+    wait_for: host={{ inventory_hostname }} port=830 timeout={{ wait_time }}
+    when: not sw.check_mode
+
+  - name: send mail
+    mail:
+     subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+     body: ' Automated upgade of {{ inventory_hostname }} is complete.
+     Firmware has been upgraded to: {{ OS_version }}'
+     to: net-services@databank.com
+
