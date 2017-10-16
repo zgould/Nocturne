@@ -1,10 +1,11 @@
 ---
-wait_time: 3600
+wait_time: 1800
+delay_time: 1800
 pkg_dir: /tftpboot/juniper/
 ### Only Change Below Variables ###
 
 OS_version: 14.1X53-D45.3
-OS_package: jinstall-ex-4300-14.1X53-D45.3-domestic-signed.tgz
+OS_package: jinstall-ex-4300-14.1X53-D45.3-domestic-signed.tgz 
 nssu: no
 
 ### End of Change Variables ###

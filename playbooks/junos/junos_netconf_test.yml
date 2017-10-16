@@ -1,6 +1,5 @@
 - name: NETCONF Test - JunOS
-  hosts: junos-ex4300
-  hosts: all
+  hosts: slc2-int-switches-junos
   roles:
   - Juniper.junos
   connection: local

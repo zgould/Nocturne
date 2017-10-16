@@ -1,12 +1,21 @@
 ---
-  - name: wait_reboot
-    wait_for: host={{ inventory_hostname }} port=830 timeout={{ wait_time }}
-    when: not sw.check_mode
+- name: send mail - Success
+  listen: notify mail
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+   body: ' Automated upgrade of {{ inventory_hostname }} is complete.
+   Firmware has been upgraded to: {{ OS_version }}'
+   to: net-services@databank.com
+   charset: utf8
+  when: validate_results|succeeded
 
-  - name: send mail
-    mail:
-     subject: Firmware Upgrade of {{ inventory_hostname }} Complete
-     body: ' Automated upgade of {{ inventory_hostname }} is complete.
-     Firmware has been upgraded to: {{ OS_version }}'
-     to: net-services@databank.com
+- name: send mail - Failure
+  listen: notify mail
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Failed.
+   body: ' Automated upgrade of {{ inventory_hostname }} Failed.
+   Please contact the OCE'
+   to: net-services@databank.com
+   charset: utf8
+  when: validate_results|failed
 

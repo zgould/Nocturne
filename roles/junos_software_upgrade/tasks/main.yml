@@ -8,10 +8,48 @@
    host={{ inventory_hostname }}
    nssu={{ nssu }}
    version={{ OS_version }}
-   reboot=yes
+   reboot=no
    package={{ pkg_dir }}/{{ OS_package }}
    logfile={{ log_dir }}/software.log
-  register: sw
-  notify:
-  - wait_reboot
-  - send mail
+
+- name: Reboot JunOS
+  junos_shutdown:
+   user=databank
+   host={{ inventory_hostname }}
+   shutdown="shutdown"
+   reboot=yes
+  ignore_errors: yes
+
+- name: Wait for Upgrade to Complete
+  pause: 
+   minutes: 30
+   prompt: Waiting for Upgrade to Complete
+
+- name: Validate Successful Upgrade
+  junos_command:
+   commands:
+   - show version
+   provider:
+    username: databank
+   wait_for: result[0] contains "{{ OS_version }}"
+  register: validate_results
+  ignore_errors: yes
+
+- name: send mail - Success
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Complete
+   body: ' Automated upgrade of {{ inventory_hostname }} is complete.
+   Firmware has been upgraded to: {{ OS_version }}'
+   to: net-services@databank.com, tier1ops@databank.com, zgould@databank.com
+   charset: utf8
+  when: validate_results|succeeded
+
+- name: send mail - Failure
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Failed.
+   body: ' Automated upgrade of {{ inventory_hostname }} Failed.
+   Please contact the Zack Gould (816-803-2029)'
+   to: net-services@databank.com, tier1ops@databank.com, zgould@databank.com
+   charset: utf8
+  when: validate_results|failed
+
