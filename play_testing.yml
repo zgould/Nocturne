@@ -1,0 +1,12 @@
+- name: Running Playbook
+  hosts: swi-pr-1a1
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - ios_facts:
+      gather_subset: 
+        - hardware
+      provider: "{{ ios_creds }}"
+
+  - debug: msg="{{ ansible_net_version }}"   

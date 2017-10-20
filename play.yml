@@ -1,0 +1,10 @@
+- name: Running Playbook
+  hosts: slc3-int-switches-junos
+  serial: 1
+  roles:
+  - Juniper.junos
+  - zabbix_maint_enable
+  - junos_software_upgrade
+  - zabbix_maint_disable
+  connection: local
+  gather_facts: no

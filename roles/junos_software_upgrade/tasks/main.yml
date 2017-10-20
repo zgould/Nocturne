@@ -40,7 +40,8 @@
    subject: Firmware Upgrade of {{ inventory_hostname }} Complete
    body: ' Automated upgrade of {{ inventory_hostname }} is complete.
    Firmware has been upgraded to: {{ OS_version }}'
-   to: net-services@databank.com, tier1ops@databank.com, zgould@databank.com
+   to: zgould@databank.com
+   cc: net-services@databank.com
    charset: utf8
   when: validate_results|succeeded
 
@@ -49,7 +50,8 @@
    subject: Firmware Upgrade of {{ inventory_hostname }} Failed.
    body: ' Automated upgrade of {{ inventory_hostname }} Failed.
    Please contact the Zack Gould (816-803-2029)'
-   to: net-services@databank.com, tier1ops@databank.com, zgould@databank.com
+   to: zgould@databank.com
+   cc: net-services@databank.com
    charset: utf8
   when: validate_results|failed
 

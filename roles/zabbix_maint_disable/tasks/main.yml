@@ -1,0 +1,10 @@
+---
+- name: Remove maintenance window for "{{ inventory_hostname }}"
+  zabbix_maintenance:
+    name: Update of "{{ inventory_hostname }}"
+    host_name: "{{ inventory_hostname }}"
+    state: absent
+    server_url: http://mci2-zabbix-master.databank.local/zabbix/
+    login_user: "{{ zabbixuser }}"
+    login_password: "{{ zabbixpass }}"
+

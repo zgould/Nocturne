@@ -1,0 +1,49 @@
+---
+- name: Register Old Version(s)
+  asa_command:
+   commands:
+    -  show failover | grep Version
+   provider: "{{ asa_creds }}"
+  register: version_old
+  ignore_errors: yes
+
+- name: Set New Firmware &  Reboot
+  asa_config:
+   lines:
+    - no boot system disk0:/{{ old_boot }}
+    - boot system disk0:/{{ new_boot }}
+    - wr me
+    - reload noconfirm
+   provider: "{{ asa_creds }}"
+  register: firmware
+  ignore_errors: yes
+
+- name: Wait for Upgrade To Complete (30 Minutes)
+  pause:
+   minutes: 30
+
+- name: Register New Version(s)
+  asa_command:
+   commands:
+    - show failover | g Version
+   provider: "{{ asa_creds }}"
+  register: version_new
+  ignore_errors: yes
+  notify: slack
+
+- name: Send Mail - Success
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Completed Successfully
+   body: ' Automated upgade of {{ inventory_hostname }} is complete.
+   Firmware has been upgraded to: {{ new_boot }}'
+   to: zgould@databank.com
+   charset: utf8
+  when: version_old != version_new
+
+- name: Send Mail - Failure
+  mail:
+   subject: Firmware Upgrade of {{ inventory_hostname }} Failed
+   body: ' Automated upgade of {{ inventory_hostname }} has failed.'
+   to: zgould@databank.com
+   charset: utf8
+  when: (version_old == version_new) or (version_old|failed) or (version_new|failed) or (firmware|failed)

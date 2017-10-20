@@ -1,0 +1,10 @@
+---
+- name: slack
+  slack:
+    token: T6CS1RHTK/B6GB2FSHM/c7wdg4btduYvFS6HM816Co0P
+    msg: "Automated Upgrade of {{ inventory_hostname }} completed successfully"
+    color: good
+    channel: #netops
+    username: Ansible
+  delegate_to: localhost
+  when: version_old != version_new 

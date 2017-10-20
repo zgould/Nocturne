@@ -1,0 +1,4 @@
+---
+- name: SCP Firmware Onto Device
+  local_action: command scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no /tftpboot/asa/{{ firmware_image }} databank@{{ inventory_hostname }}:disk0:{{ firmware_image }}
+
