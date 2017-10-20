@@ -1,0 +1,7 @@
+- name: Running Playbook
+  hosts: zcloud-fwa
+  serial: 1
+  roles:
+  - asa_software_upgrade 
+  connection: local
+  gather_facts: no

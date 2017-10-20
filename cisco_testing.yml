@@ -1,0 +1,24 @@
+- name: Running Playbook
+  hosts: mci2-gcts-fwa
+  connection: local
+  gather_facts: no
+  vars:
+   creds:
+    username: databank
+    password: Ste@ks2
+    host: "{{ inventory_hostname }}"
+    authorize: yes
+    auth_pass: ch!cK3n
+   orig_boot: asa916-10-k8.bin
+   new_boot: asa917-16-k8.bin
+
+  tasks:
+
+  - name: Set Firmware for Upgrade On Reboot
+    asa_config:
+     lines:
+      - failover exec standby show version | g Software
+     provider: "{{ creds }}"
+    register: results
+
+  - debug: var=results

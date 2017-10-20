@@ -1,0 +1,41 @@
+- name: Running Playbook
+  hosts: kc2-swi-salescloset
+  serial: 1
+  connection: local
+  gather_facts: no
+  vars:
+   os_version: 12.3R12.4
+
+  tasks:
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: JunOS Commands
+    junos_command:
+     commands: show version
+     provider:
+      username: databank
+    failed_when: '"[Peanuts]" in results.stdout[0]'
+    register: results
+    ignore_errors: yes
+
+  - name: debug
+    debug: var=results
+
+  - name: send mail
+    mail:
+     subject: Firmware Upgrade of  Complete
+     body: ' Automated upgade of FAILED HORRIBLY'
+     charset: utf8
+     to: zgould@databank.com
+    when: results|failed 
+
+#  - name: send mail
+#    mail:
+#     subject: Firmware Upgrade of Complete
+#     body: ' Automated upgade of  WORKED GREAT!!'
+#     charset: utf8
+#     to: zgould@databank.com
+#    when: results|failed
+
